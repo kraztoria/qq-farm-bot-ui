@@ -38,11 +38,11 @@ async function loadFarm() {
     const data = await api('/api/lands');
     const grid = $('farm-grid');
     const sum = $('farm-summary');
-    
-    if (!data || !data.lands) { 
-        grid.innerHTML = '<div style="padding:20px;text-align:center;color:#666">无法获取数据，请确保账号已登录</div>'; 
-        sum.textContent = ''; 
-        return; 
+
+    if (!data || !data.lands) {
+        grid.innerHTML = '<div style="padding:20px;text-align:center;color:#666">无法获取数据，请确保账号已登录</div>';
+        sum.textContent = '';
+        return;
     }
 
     const statusClass = { locked: 'locked', empty: 'empty', harvestable: 'harvestable', growing: 'growing', dead: 'dead', stealable: 'stealable', harvested: 'empty' };
@@ -60,7 +60,7 @@ async function loadFarm() {
         };
         const landTypeName = landTypeNameMap[Math.max(0, Math.min(4, landLevel))] || '土地';
         const phaseText = renderLandPhaseText(landLevel, l);
-        
+
         let needs = [];
         if (l.needWater) needs.push('水');
         if (l.needWeed) needs.push('草');
@@ -76,9 +76,9 @@ async function loadFarm() {
             </div>`;
     }).join('');
     ensureMatureCountdownTimer();
-    
+
     const s = data.summary || {};
-    sum.textContent = `可收:${s.harvestable||0} 长:${s.growing||0} 空:${s.empty||0} 枯:${s.dead||0}`;
+    sum.textContent = `可收:${s.harvestable || 0} 长:${s.growing || 0} 空:${s.empty || 0} 枯:${s.dead || 0}`;
 }
 
 // 好友列表加载
@@ -90,11 +90,11 @@ async function loadFriends() {
     const list = await api('/api/friends');
     const wrap = $('friends-list');
     const summary = $('friend-summary');
-    
-    if (!list || !list.length) { 
+
+    if (!list || !list.length) {
         if (summary) summary.textContent = '共 0 名好友';
-        wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#666">暂无好友或数据加载失败</div>'; 
-        return; 
+        wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#666">暂无好友或数据加载失败</div>';
+        return;
     }
 
     if (summary) summary.textContent = `共 ${list.length} 名好友`;
@@ -107,12 +107,12 @@ async function loadFriends() {
         if (p.weedNum) info.push(`草${p.weedNum}`);
         if (p.insectNum) info.push(`虫${p.insectNum}`);
         const preview = info.length ? info.join(' ') : '无操作';
-        
+
         return `
             <div class="friend-item">
                 <div class="friend-header" onclick="toggleFriend('${f.gid}')">
                     <span class="name">${f.name}</span>
-                    <span class="preview ${info.length?'has-work':''}">${preview}</span>
+                    <span class="preview ${info.length ? 'has-work' : ''}">${preview}</span>
                 </div>
                 <div class="friend-actions">
                     <button class="btn btn-sm" onclick="friendQuickOp(event, '${f.gid}', 'steal')">一键偷取</button>
@@ -135,18 +135,18 @@ window.toggleFriend = async (gid) => {
         el.style.display = 'none';
         return;
     }
-    
+
     // 收起其他
     document.querySelectorAll('.friend-lands').forEach(e => e.style.display = 'none');
-    
+
     el.style.display = 'block';
-    
+
     const data = await api(`/api/friend/${gid}/lands`);
     if (!data || !data.lands) {
         el.innerHTML = '<div style="padding:10px;text-align:center;color:#F44336">加载失败</div>';
         return;
     }
-    
+
     const statusClass = { empty: 'empty', locked: 'empty', stealable: 'harvestable', harvested: 'empty', dead: 'dead', growing: 'growing' };
     const landTypeNameMap = {
         0: '未解锁',
@@ -158,16 +158,16 @@ window.toggleFriend = async (gid) => {
     el.innerHTML = `
         <div class="farm-grid mini">
             ${data.lands.map(l => {
-                let cls = statusClass[l.status] || 'empty';
-                const landLevel = Number(l.level || 0);
-                const landLevelClass = `land-level-${Math.max(0, Math.min(4, landLevel))}`;
-                const landTypeName = landTypeNameMap[Math.max(0, Math.min(4, landLevel))] || '土地';
-                const phaseText = renderLandPhaseText(landLevel, l);
-                let needs = [];
-                if (l.needWater) needs.push('水');
-                if (l.needWeed) needs.push('草');
-                if (l.needBug) needs.push('虫');
-                return `
+        let cls = statusClass[l.status] || 'empty';
+        const landLevel = Number(l.level || 0);
+        const landLevelClass = `land-level-${Math.max(0, Math.min(4, landLevel))}`;
+        const landTypeName = landTypeNameMap[Math.max(0, Math.min(4, landLevel))] || '土地';
+        const phaseText = renderLandPhaseText(landLevel, l);
+        let needs = [];
+        if (l.needWater) needs.push('水');
+        if (l.needWeed) needs.push('草');
+        if (l.needBug) needs.push('虫');
+        return `
                     <div class="land-cell ${cls} ${landLevelClass}">
                         <span class="id">#${l.id}</span>
                         ${renderLandCropImage(l)}
@@ -176,7 +176,7 @@ window.toggleFriend = async (gid) => {
                         <span class="land-meta">${landTypeName}</span>
                          ${needs.length ? `<span class="needs">${needs.join(' ')}</span>` : ''}
                     </div>`;
-            }).join('')}
+    }).join('')}
         </div>
     `;
     ensureMatureCountdownTimer();
@@ -208,16 +208,16 @@ window.friendQuickOp = async (event, gid, opType) => {
                 landsEl.innerHTML = `
                     <div class="farm-grid mini">
                         ${data.lands.map(l => {
-                            const cls = statusClass[l.status] || 'empty';
-                            const landLevel = Number(l.level || 0);
-                            const landLevelClass = `land-level-${Math.max(0, Math.min(4, landLevel))}`;
-                            const landTypeName = landTypeNameMap[Math.max(0, Math.min(4, landLevel))] || '土地';
-                            const phaseText = renderLandPhaseText(landLevel, l);
-                            const needs = [];
-                            if (l.needWater) needs.push('水');
-                            if (l.needWeed) needs.push('草');
-                            if (l.needBug) needs.push('虫');
-                            return `
+                    const cls = statusClass[l.status] || 'empty';
+                    const landLevel = Number(l.level || 0);
+                    const landLevelClass = `land-level-${Math.max(0, Math.min(4, landLevel))}`;
+                    const landTypeName = landTypeNameMap[Math.max(0, Math.min(4, landLevel))] || '土地';
+                    const phaseText = renderLandPhaseText(landLevel, l);
+                    const needs = [];
+                    if (l.needWater) needs.push('水');
+                    if (l.needWeed) needs.push('草');
+                    if (l.needBug) needs.push('虫');
+                    return `
                                 <div class="land-cell ${cls} ${landLevelClass}">
                                     <span class="id">#${l.id}</span>
                                     ${renderLandCropImage(l)}
@@ -226,7 +226,7 @@ window.friendQuickOp = async (event, gid, opType) => {
                                     <span class="land-meta">${landTypeName}</span>
                                     ${needs.length ? `<span class="needs">${needs.join(' ')}</span>` : ''}
                                 </div>`;
-                        }).join('')}
+                }).join('')}
                     </div>
                 `;
                 ensureMatureCountdownTimer();
@@ -242,40 +242,40 @@ window.friendQuickOp = async (event, gid, opType) => {
 async function loadSeeds(preferredSeed) {
     if (seedLoadPromise) return seedLoadPromise;
     seedLoadPromise = (async () => {
-    const list = await api('/api/seeds');
-    const sel = $('seed-select');
-    sel.innerHTML = '<option value="0">自动选择 (按策略)</option>';
-    if (list && list.length) {
-        list.forEach(s => {
-            const o = document.createElement('option');
-            o.value = s.seedId;
-            const levelText = (s.requiredLevel === null || s.requiredLevel === undefined) ? 'Lv?' : `Lv${s.requiredLevel}`;
-            const priceText = (s.price === null || s.price === undefined) ? '价格未知' : `${s.price}金`;
-            let text = `${levelText} ${s.name} (${priceText})`;
-            if (s.locked) {
-                text += ' [未解锁]';
-                o.disabled = true;
-                o.style.color = '#666';
-            } else if (s.soldOut) {
-                text += ' [售罄]';
-                o.disabled = true;
-                o.style.color = '#666';
-            }
-            o.textContent = text;
-            sel.appendChild(o);
-        });
-    }
-    sel.dataset.loaded = '1';
-    if (preferredSeed !== undefined && preferredSeed !== null) {
-        const preferredVal = String(preferredSeed || 0);
-        if (preferredVal !== '0' && !Array.from(sel.options).some(opt => opt.value === preferredVal)) {
-            const fallbackOption = document.createElement('option');
-            fallbackOption.value = preferredVal;
-            fallbackOption.textContent = `种子${preferredVal} (当前不可购买/详情未知)`;
-            sel.appendChild(fallbackOption);
+        const list = await api('/api/seeds');
+        const sel = $('seed-select');
+        sel.innerHTML = '<option value="0">自动选择 (按策略)</option>';
+        if (list && list.length) {
+            list.forEach(s => {
+                const o = document.createElement('option');
+                o.value = s.seedId;
+                const levelText = (s.requiredLevel === null || s.requiredLevel === undefined) ? 'Lv?' : `Lv${s.requiredLevel}`;
+                const priceText = (s.price === null || s.price === undefined) ? '价格未知' : `${s.price}金`;
+                let text = `${levelText} ${s.name} (${priceText})`;
+                if (s.locked) {
+                    text += ' [未解锁]';
+                    o.disabled = true;
+                    o.style.color = '#666';
+                } else if (s.soldOut) {
+                    text += ' [售罄]';
+                    o.disabled = true;
+                    o.style.color = '#666';
+                }
+                o.textContent = text;
+                sel.appendChild(o);
+            });
         }
-        sel.value = preferredVal;
-    }
+        sel.dataset.loaded = '1';
+        if (preferredSeed !== undefined && preferredSeed !== null) {
+            const preferredVal = String(preferredSeed || 0);
+            if (preferredVal !== '0' && !Array.from(sel.options).some(opt => opt.value === preferredVal)) {
+                const fallbackOption = document.createElement('option');
+                fallbackOption.value = preferredVal;
+                fallbackOption.textContent = `种子${preferredVal} (当前不可购买/详情未知)`;
+                sel.appendChild(fallbackOption);
+            }
+            sel.value = preferredVal;
+        }
     })().finally(() => {
         seedLoadPromise = null;
     });
@@ -386,7 +386,7 @@ $('fertilizer-select').addEventListener('change', async () => {
     // id: auto-friend-steal -> key: friend_steal
     const key = id.replace('auto-', '').replace(/-/g, '_');
     const el = document.getElementById(id);
-    if(el) {
+    if (el) {
         el.addEventListener('change', async () => {
             if (id === 'auto-friend') {
                 updateFriendSubControlsState();
@@ -433,7 +433,7 @@ $('btn-save-settings').addEventListener('click', async () => {
     $('interval-farm-max').value = String(farmMax);
     $('interval-friend-min').value = String(friendMin);
     $('interval-friend-max').value = String(friendMax);
-    
+
     const saveBtn = $('btn-save-settings');
     if (saveBtn) saveBtn.disabled = true;
     try {
@@ -681,10 +681,10 @@ document.querySelectorAll('.nav-item').forEach(item => {
         const pageId = 'page-' + item.dataset.page;
         const page = document.getElementById(pageId);
         if (page) page.classList.add('active');
-        
+
         $('page-title').textContent = item.textContent.trim();
         if (item.dataset.page === 'dashboard') renderOpsList(lastOperationsData);
-        
+
         if (item.dataset.page === 'farm') loadFarm();
         if (item.dataset.page === 'bag') loadBag();
         if (item.dataset.page === 'friends') loadFriends();
@@ -702,10 +702,10 @@ async function loadAnalytics() {
     const container = $('analytics-list');
     if (!container) return;
     container.innerHTML = '<div style="padding:20px;text-align:center;color:#888"><i class="fas fa-spinner fa-spin"></i> 加载中...</div>';
-    
+
     const sort = $('analytics-sort').value;
     const list = await api(`/api/analytics?sort=${sort}`);
-    
+
     if (!list || !list.length) {
         container.innerHTML = '<div style="padding:24px;text-align:center;color:#666;font-size:16px">暂无数据</div>';
         return;
@@ -730,7 +730,7 @@ async function loadAnalytics() {
             return bv - av;
         });
     }
-    
+
     // 表格头
     let html = `
     <table style="width:100%;border-collapse:collapse;color:var(--text-main)">
@@ -746,7 +746,7 @@ async function loadAnalytics() {
         </thead>
         <tbody>
     `;
-    
+
     list.forEach((item, index) => {
         const lvText = (item.level === null || item.level === undefined || item.level === '' || Number(item.level) < 0)
             ? '未知'
@@ -765,7 +765,7 @@ async function loadAnalytics() {
             </tr>
         `;
     });
-    
+
     html += '</tbody></table>';
     container.innerHTML = html;
 }
@@ -796,7 +796,6 @@ function renderAccountManager() {
                     ? `<button class="btn acc-btn acc-btn-stop" onclick="stopAccount('${a.id}')">停止</button>`
                     : `<button class="btn btn-primary acc-btn" onclick="startAccount('${a.id}')">启动</button>`
                 }
-                <button class="btn btn-primary acc-btn" onclick="refreshAccountCode('${a.id}')">更新码</button>
                 <button class="btn btn-primary acc-btn" onclick="editAccount('${a.id}')">编辑</button>
                 <button class="btn acc-btn acc-btn-danger" onclick="deleteAccount('${a.id}')">删除</button>
             </div>

@@ -112,7 +112,7 @@ function startAdminServer(dataProvider) {
     app.get('/api/status', async (req, res) => {
         const id = getAccId(req);
         if (!id) return res.json({ ok: false, error: 'Missing x-account-id' });
-        
+
         try {
             const data = provider.getStatus(id);
             res.json({ ok: true, data });
@@ -326,10 +326,15 @@ function startAdminServer(dataProvider) {
             res.status(500).json({ ok: false, error: e.message });
         }
     });
-    
+
     app.post('/api/accounts', (req, res) => {
         try {
             const isUpdate = !!req.body.id;
+            let wasRunning = false;
+            if (isUpdate && provider.isAccountRunning) {
+                wasRunning = provider.isAccountRunning(req.body.id);
+            }
+
             const data = addOrUpdateAccount(req.body);
             if (provider.addAccountLog) {
                 const accountId = isUpdate ? String(req.body.id) : String((data.accounts[data.accounts.length - 1] || {}).id || '');
@@ -341,22 +346,20 @@ function startAdminServer(dataProvider) {
                     accountName
                 );
             }
-            // 如果是新增或修改 Code，重启 worker?
-            if (req.body.id) {
-                // provider.restartAccount(req.body.id); // TODO: implement restart
-                provider.stopAccount(req.body.id);
-                provider.startAccount(req.body.id);
-            } else {
-                // 新增
+            // 如果是新增，自动启动
+            if (!isUpdate) {
                 const newAcc = data.accounts[data.accounts.length - 1];
-                provider.startAccount(newAcc.id);
+                if (newAcc) provider.startAccount(newAcc.id);
+            } else if (wasRunning) {
+                // 如果是更新，且之前在运行，则重启
+                provider.restartAccount(req.body.id);
             }
             res.json({ ok: true, data });
         } catch (e) {
             res.status(500).json({ ok: false, error: e.message });
         }
     });
-    
+
     app.delete('/api/accounts/:id', (req, res) => {
         try {
             const before = provider.getAccounts();
