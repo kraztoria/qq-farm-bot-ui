@@ -33,7 +33,7 @@ watch(currentAccountId, () => {
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="space-y-4">
     <div class="mb-4 flex items-center justify-between">
       <h2 class="flex items-center gap-2 text-2xl font-bold">
         <div class="i-carbon-inventory-management" />

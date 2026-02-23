@@ -570,8 +570,26 @@ async function getDailyGiftOverview() {
             { key: 'email_rewards', label: '邮箱奖励', enabled: !!auto.email, doneToday: !!email.doneToday, lastAt: Number(email.lastCheckAt || 0) },
             { key: 'mall_free_gifts', label: '商城免费礼包', enabled: !!auto.free_gifts, doneToday: !!free.doneToday, lastAt: Number(free.lastClaimAt || 0) },
             { key: 'daily_share', label: '分享礼包', enabled: !!auto.share_reward, doneToday: !!share.doneToday, lastAt: Number(share.lastClaimAt || 0) },
-            { key: 'vip_daily_gift', label: '会员礼包', enabled: !!auto.vip_gift, doneToday: !!vip.doneToday, lastAt: Number(vip.lastClaimAt || 0) },
-            { key: 'month_card_gift', label: '月卡礼包', enabled: !!auto.month_card, doneToday: !!month.doneToday, lastAt: Number(month.lastClaimAt || 0) },
+            {
+                key: 'vip_daily_gift',
+                label: '会员礼包',
+                enabled: !!auto.vip_gift,
+                doneToday: !!vip.doneToday,
+                lastAt: Number(vip.lastClaimAt || vip.lastCheckAt || 0),
+                hasGift: Object.prototype.hasOwnProperty.call(vip, 'hasGift') ? !!vip.hasGift : undefined,
+                canClaim: Object.prototype.hasOwnProperty.call(vip, 'canClaim') ? !!vip.canClaim : undefined,
+                result: vip.result || '',
+            },
+            {
+                key: 'month_card_gift',
+                label: '月卡礼包',
+                enabled: !!auto.month_card,
+                doneToday: !!month.doneToday,
+                lastAt: Number(month.lastClaimAt || month.lastCheckAt || 0),
+                hasCard: Object.prototype.hasOwnProperty.call(month, 'hasCard') ? !!month.hasCard : undefined,
+                hasClaimable: Object.prototype.hasOwnProperty.call(month, 'hasClaimable') ? !!month.hasClaimable : undefined,
+                result: month.result || '',
+            },
         ],
     };
 }

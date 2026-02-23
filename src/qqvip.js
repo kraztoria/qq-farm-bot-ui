@@ -12,6 +12,9 @@ const CHECK_COOLDOWN_MS = 10 * 60 * 1000;
 let doneDateKey = '';
 let lastCheckAt = 0;
 let lastClaimAt = 0;
+let lastResult = '';
+let lastHasGift = null;
+let lastCanClaim = null;
 
 function getDateKey() {
     const now = new Date();
@@ -69,8 +72,11 @@ async function performDailyVipGift(force = false) {
 
     try {
         const status = await getDailyGiftStatus();
+        lastHasGift = !!(status && status.has_gift);
+        lastCanClaim = !!(status && status.can_claim);
         if (!status || !status.can_claim) {
             markDoneToday();
+            lastResult = 'none';
             log('会员', '今日暂无可领取会员礼包', {
                 module: 'task',
                 event: DAILY_KEY,
@@ -89,11 +95,13 @@ async function performDailyVipGift(force = false) {
         });
         lastClaimAt = Date.now();
         markDoneToday();
+        lastResult = 'ok';
         return true;
     } catch (e) {
         if (isAlreadyClaimedError(e)) {
             markDoneToday();
             lastClaimAt = Date.now();
+            lastResult = 'ok';
             log('会员', '今日会员礼包已领取', {
                 module: 'task',
                 event: DAILY_KEY,
@@ -101,6 +109,7 @@ async function performDailyVipGift(force = false) {
             });
             return false;
         }
+        lastResult = 'error';
         log('会员', `领取会员礼包失败: ${e.message}`, {
             module: 'task',
             event: DAILY_KEY,
@@ -117,5 +126,8 @@ module.exports = {
         doneToday: isDoneToday(),
         lastCheckAt,
         lastClaimAt,
+        result: lastResult,
+        hasGift: lastHasGift,
+        canClaim: lastCanClaim,
     }),
 };

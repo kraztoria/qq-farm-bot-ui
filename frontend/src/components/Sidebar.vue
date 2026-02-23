@@ -87,7 +87,10 @@ onMounted(() => {
 })
 
 useIntervalFn(checkConnection, 30000)
-useIntervalFn(refreshStatus, 10000)
+useIntervalFn(() => {
+  refreshStatus()
+  accountStore.fetchAccounts()
+}, 10000)
 
 watch(currentAccount, () => {
   refreshStatus()
@@ -115,7 +118,11 @@ const displayName = computed(() => {
   if (acc.name)
     return acc.name
 
-  // 3. 最后显示UIN
+  // 3. 显示同步的昵称 (nick)
+  if (acc.nick)
+    return acc.nick
+
+  // 4. 最后显示UIN
   return acc.uin
 })
 
@@ -252,7 +259,7 @@ watch(
                 </div>
                 <div class="min-w-0 flex flex-1 flex-col items-start">
                   <span class="w-full truncate text-left text-sm font-medium">
-                    {{ acc.name || acc.uin }}
+                    {{ acc.name || acc.nick || acc.uin }}
                   </span>
                   <span class="text-xs text-gray-400">{{ acc.uin }}</span>
                 </div>

@@ -162,7 +162,7 @@ async function autoOpenFertilizerGiftPacks() {
         if (opened > 0) {
             fertilizerGiftDoneDateKey = getDateKey();
             fertilizerGiftLastOpenAt = Date.now();
-            log('仓库', `自动使用化肥类道具 x${opened}${details.length ? ` (${details.join('，')})` : ''}`, {
+            log('仓库', `自动使用化肥类道具 x${opened}${details.length ? ` [${details.join('，')}]` : ''}`, {
                 module: 'warehouse',
                 event: 'fertilizer_gift_open',
                 result: 'ok',

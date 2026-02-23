@@ -12,6 +12,9 @@ const CHECK_COOLDOWN_MS = 10 * 60 * 1000;
 let doneDateKey = '';
 let lastCheckAt = 0;
 let lastClaimAt = 0;
+let lastResult = '';
+let lastHasCard = null;
+let lastHasClaimable = null;
 
 function getDateKey() {
     const now = new Date();
@@ -67,9 +70,22 @@ async function performDailyMonthCardGift(force = false) {
     try {
         const rep = await getMonthCardInfos();
         const infos = Array.isArray(rep && rep.infos) ? rep.infos : [];
+        lastHasCard = infos.length > 0;
         const claimable = infos.filter((x) => x && x.can_claim && Number(x.goods_id || 0) > 0);
+        lastHasClaimable = claimable.length > 0;
+        if (!infos.length) {
+            markDoneToday();
+            lastResult = 'none';
+            log('月卡', '当前没有月卡或已过期', {
+                module: 'task',
+                event: DAILY_KEY,
+                result: 'none',
+            });
+            return false;
+        }
         if (!claimable.length) {
             markDoneToday();
+            lastResult = 'none';
             log('月卡', '今日暂无可领取月卡礼包', {
                 module: 'task',
                 event: DAILY_KEY,
@@ -102,6 +118,7 @@ async function performDailyMonthCardGift(force = false) {
         if (claimed > 0) {
             lastClaimAt = Date.now();
             markDoneToday();
+            lastResult = 'ok';
             return true;
         }
         log('月卡', '本次未成功领取月卡礼包', {
@@ -109,8 +126,10 @@ async function performDailyMonthCardGift(force = false) {
             event: DAILY_KEY,
             result: 'none',
         });
+        lastResult = 'none';
         return false;
     } catch (e) {
+        lastResult = 'error';
         log('月卡', `查询月卡礼包失败: ${e.message}`, {
             module: 'task',
             event: DAILY_KEY,
@@ -127,5 +146,8 @@ module.exports = {
         doneToday: isDoneToday(),
         lastCheckAt,
         lastClaimAt,
+        result: lastResult,
+        hasCard: lastHasCard,
+        hasClaimable: lastHasClaimable,
     }),
 };

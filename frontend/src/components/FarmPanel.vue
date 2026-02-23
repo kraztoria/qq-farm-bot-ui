@@ -130,7 +130,7 @@ function getSafeImageUrl(url: string) {
 </script>
 
 <template>
-  <div class="p-4 space-y-4">
+  <div class="space-y-4">
     <div class="rounded-lg bg-white shadow dark:bg-gray-800">
       <!-- Header with Title and Actions -->
       <div class="flex flex-col items-center justify-between gap-4 border-b border-gray-100 p-4 sm:flex-row dark:border-gray-700">

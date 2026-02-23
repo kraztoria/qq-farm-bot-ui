@@ -29,6 +29,7 @@ const DEFAULT_ACCOUNT_CONFIG = {
         farm: true,
         farm_push: true,   // 收到 LandsNotify 推送时是否立即触发巡田
         land_upgrade: true, // 是否自动升级土地
+        friend: true,       // 好友互动总开关
         friend_help_exp_limit: true, // 帮忙经验达上限后自动停止帮忙
         friend_steal: true, // 偷菜
         friend_help: true,  // 帮忙
@@ -290,9 +291,19 @@ function sanitizeGlobalConfigBeforeSave() {
 function saveGlobalConfig() {
     ensureDataDir();
     try {
+        const oldJson = (() => {
+            try {
+                return fs.existsSync(STORE_FILE) ? fs.readFileSync(STORE_FILE, 'utf8') : '';
+            } catch { return ''; }
+        })();
+
         sanitizeGlobalConfigBeforeSave();
-        console.log('[系统] 正在保存配置到:', STORE_FILE);
-        fs.writeFileSync(STORE_FILE, JSON.stringify(globalConfig, null, 2), 'utf8');
+        const newJson = JSON.stringify(globalConfig, null, 2);
+        
+        if (oldJson !== newJson) {
+            console.log('[系统] 正在保存配置到:', STORE_FILE);
+            fs.writeFileSync(STORE_FILE, newJson, 'utf8');
+        }
     } catch (e) {
         console.error('保存配置失败:', e.message);
     }

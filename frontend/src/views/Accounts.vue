@@ -121,7 +121,7 @@ function handleSaved() {
             </div>
             <div>
               <h3 class="text-lg font-bold">
-                {{ acc.name || acc.id }}
+                {{ acc.name || acc.nick || acc.id }}
               </h3>
               <div class="text-sm text-gray-500">
                 QQ: {{ acc.uin || '未绑定' }}

@@ -42,7 +42,7 @@ function showAlert(message: string, type: 'primary' | 'danger' = 'primary') {
 
 const currentAccountName = computed(() => {
   const acc = accounts.value.find((a: any) => a.id === currentAccountId.value)
-  return acc ? (acc.name || acc.id) : currentAccountId.value
+  return acc ? (acc.name || acc.nick || acc.id) : null
 })
 
 const localSettings = ref({
@@ -360,7 +360,7 @@ async function handleSaveOffline() {
             />
           </div>
 
-          <div class="flex flex-wrap items-center gap-4 border-t pt-1 dark:border-gray-700">
+          <div class="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 dark:border-gray-700">
             <BaseSwitch
               v-model="localSettings.friendQuietHours.enabled"
               label="启用静默时段"
@@ -442,8 +442,18 @@ async function handleSaveOffline() {
         </div>
       </div>
 
-      <div v-else class="card rounded bg-yellow-50 p-4 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
-        请先在登录一个账号以配置策略和自动化选项。
+      <div v-else class="card flex flex-col items-center justify-center gap-4 rounded-lg bg-white p-12 text-center shadow dark:bg-gray-800">
+        <div class="rounded-full bg-gray-50 p-4 dark:bg-gray-700/50">
+          <div class="i-carbon-settings-adjust text-4xl text-gray-400 dark:text-gray-500" />
+        </div>
+        <div class="max-w-xs">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            需要登录账号
+          </h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            请先登录账号以配置策略和自动化选项。
+          </p>
+        </div>
       </div>
 
       <!-- Card 2: System Settings (Password & Offline) -->

@@ -5,7 +5,7 @@ const props = defineProps<{
   dailyGifts: any
 }>()
 
-const growth = computed(() => props.dailyGifts?.growth)
+const hasDailyData = computed(() => !!props.dailyGifts)
 const gifts = computed(() => props.dailyGifts?.gifts || [])
 
 function formatTime(timestamp: number) {
@@ -14,59 +14,63 @@ function formatTime(timestamp: number) {
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 }
 
-function getStatusClass(done: boolean, enabled: boolean) {
-  if (done) return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-  if (enabled) return 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
-  return 'text-gray-500 bg-gray-50 dark:text-gray-400 dark:bg-gray-800'
+function getGiftStatusText(gift: any) {
+  if (!gift) return '未知'
+  if (gift.key === 'vip_daily_gift' && gift.hasGift === false)
+    return '未开通'
+  if (gift.key === 'month_card_gift' && gift.hasCard === false)
+    return '未开通'
+  if (gift.doneToday) return '今日已完成'
+  if (gift.enabled) return '等待执行'
+  return '未开启'
 }
 
-function getStatusText(done: boolean, enabled: boolean) {
-  if (done) return '已完成'
-  if (enabled) return '进行中'
-  return '未开启'
+function formatGiftSubText(gift: any) {
+  if (!gift) return ''
+  if (gift.key === 'vip_daily_gift' && gift.hasGift === false)
+    return '未开通QQ会员或无每日礼包'
+  if (gift.key === 'month_card_gift' && gift.hasCard === false)
+    return '未购买月卡或已过期'
+  const ts = Number(gift.lastAt || 0)
+  if (!ts) return ''
+  if (gift.doneToday)
+    return `完成时间 ${formatTime(ts)}`
+  if (gift.enabled)
+    return `上次执行 ${formatTime(ts)}`
+  return `上次检测 ${formatTime(ts)}`
+}
+
+function formatGiftProgress(gift: any) {
+  if (!gift) return ''
+  const total = Number(gift.totalCount || 0)
+  const current = Number(gift.completedCount || 0)
+  if (!total) return ''
+  return `进度：${current}/${total}`
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <!-- Growth Task -->
-    <div v-if="growth" class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-      <div class="mb-3 flex items-center justify-between">
-        <h3 class="flex items-center gap-2 font-medium">
-          <div class="i-carbon-growth text-green-500" />
-          <span>{{ growth.label || '成长任务' }}</span>
-        </h3>
-        <span 
-          class="rounded px-2 py-0.5 text-xs font-bold"
-          :class="getStatusClass(growth.doneToday, true)"
-        >
-          {{ growth.doneToday ? '今日已完成' : `${growth.completedCount}/${growth.totalCount}` }}
-        </span>
-      </div>
-      
-      <div v-if="growth.tasks && growth.tasks.length" class="space-y-2">
-        <div 
-          v-for="(task, idx) in growth.tasks" 
-          :key="idx"
-          class="flex items-center justify-between text-sm"
-        >
-          <span class="text-gray-600 dark:text-gray-400">{{ task.desc || task.name }}</span>
-          <span class="text-xs text-gray-500">{{ task.current }}/{{ task.target }}</span>
-        </div>
-      </div>
-      <div v-else class="text-center text-sm text-gray-400">
-        暂无任务详情
-      </div>
-    </div>
-
     <!-- Daily Gifts Grid -->
     <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
       <h3 class="mb-3 flex items-center gap-2 font-medium">
         <div class="i-carbon-gift text-pink-500" />
         <span>每日礼包 & 任务</span>
       </h3>
-      
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+
+      <div
+        v-if="!hasDailyData"
+        class="rounded-lg bg-gray-50 p-6 text-center text-sm text-gray-500 dark:bg-gray-900/40 dark:text-gray-400"
+      >
+        请登录账号后查看
+      </div>
+      <div
+        v-else-if="!gifts.length"
+        class="rounded-lg bg-gray-50 p-6 text-center text-sm text-gray-500 dark:bg-gray-900/40 dark:text-gray-400"
+      >
+        暂无每日礼包与任务数据
+      </div>
+      <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div 
           v-for="gift in gifts" 
           :key="gift.key"
@@ -82,15 +86,20 @@ function getStatusText(done: boolean, enabled: boolean) {
                 class="text-xs"
                 :class="gift.doneToday ? 'text-green-500' : (gift.enabled ? 'text-blue-500' : 'text-gray-400')"
               >
-                {{ getStatusText(gift.doneToday, gift.enabled) }}
-              </span>
-              <span v-if="gift.doneToday" class="text-[10px] text-gray-400">
-                {{ formatTime(gift.lastAt) }}
+                {{ getGiftStatusText(gift) }}
               </span>
             </div>
             
-            <div v-if="gift.totalCount > 0" class="text-xs font-bold text-gray-500">
-              {{ gift.completedCount }}/{{ gift.totalCount }}
+            <div class="flex flex-col items-end">
+              <span v-if="formatGiftProgress(gift)" class="text-xs font-bold text-gray-500">
+                {{ formatGiftProgress(gift) }}
+              </span>
+              <span
+                v-if="formatGiftSubText(gift)"
+                class="mt-0.5 text-[10px] text-gray-400"
+              >
+                {{ formatGiftSubText(gift) }}
+              </span>
             </div>
           </div>
         </div>

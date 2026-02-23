@@ -873,6 +873,9 @@ async function visitFriend(friend, totalActions, myGid) {
 
 async function checkFriends() {
     const state = getUserState();
+    // 首先检查主开关，如果未开启则直接返回
+    if (!isAutomationOn('friend')) return false;
+
     const helpEnabled = !!isAutomationOn('friend_help');
     const stealEnabled = !!isAutomationOn('friend_steal');
     const badEnabled = !!isAutomationOn('friend_bad');

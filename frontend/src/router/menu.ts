@@ -15,18 +15,11 @@ export const menuRoutes: MenuItem[] = [
     component: () => import('@/views/Dashboard.vue'),
   },
   {
-    path: 'farm',
-    name: 'farm',
-    label: '农场',
-    icon: 'i-carbon-sprout',
-    component: () => import('@/views/Farm.vue'),
-  },
-  {
-    path: 'bag',
-    name: 'bag',
-    label: '背包',
-    icon: 'i-carbon-box',
-    component: () => import('@/views/Bag.vue'),
+    path: 'personal',
+    name: 'personal',
+    label: '个人',
+    icon: 'i-carbon-user',
+    component: () => import('@/views/Personal.vue'),
   },
   {
     path: 'friends',

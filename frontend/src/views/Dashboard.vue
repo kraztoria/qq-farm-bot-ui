@@ -6,7 +6,6 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCheckbox from '@/components/ui/BaseCheckbox.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
-import DailyOverview from '@/components/DailyOverview.vue'
 import { useAccountStore } from '@/stores/account'
 import { useBagStore } from '@/stores/bag'
 import { useStatusStore } from '@/stores/status'
@@ -14,7 +13,7 @@ import { useStatusStore } from '@/stores/status'
 const statusStore = useStatusStore()
 const accountStore = useAccountStore()
 const bagStore = useBagStore()
-const { status, logs: statusLogs, dailyGifts } = storeToRefs(statusStore)
+const { status, logs: statusLogs } = storeToRefs(statusStore)
 const { currentAccountId, logs: accountLogs } = storeToRefs(accountStore)
 const { dashboardItems } = storeToRefs(bagStore)
 const logContainer = ref<HTMLElement | null>(null)
@@ -75,12 +74,12 @@ const displayName = computed(() => {
   // Check login status
   if (!status.value?.connection?.connected) {
     const account = accountStore.currentAccount
-    return account?.name || '未登录'
+    return account?.name || account?.nick || '未登录'
   }
 
   // Fallback to account name (usually ID) or '未命名'
   const account = accountStore.currentAccount
-  return account?.name || '未命名'
+  return account?.name || account?.nick || '未命名'
 })
 
 // Exp Rate & Time to Level
@@ -248,7 +247,6 @@ function refresh() {
       keyword: filter.keyword || undefined,
       isWarn: filter.isWarn ? 'true' : undefined,
     })
-    statusStore.fetchDailyGifts(currentAccountId.value)
     accountStore.fetchLogs()
     bagStore.fetchBag(currentAccountId.value)
   }
@@ -426,9 +424,6 @@ useIntervalFn(updateCountdowns, 1000)
     <div class="flex flex-col items-stretch gap-6 lg:flex-row">
       <!-- Logs (Left Column) -->
       <div class="flex flex-col gap-6 lg:w-3/4">
-        <!-- Daily Overview -->
-        <DailyOverview v-if="dailyGifts" :daily-gifts="dailyGifts" />
-        
         <!-- Logs -->
         <div class="flex flex-col rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
